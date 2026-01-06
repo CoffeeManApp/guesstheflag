@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flag Quiz | Minimalist</title>
+    <style>
+        :root {
+            --bg-color: #f0f7ff;
+            --card-bg: #ffffff;
+            --accent: #0091ea;
+            --accent-light: #e1f5fe;
+            --text-main: #01579b;
+            --text-sub: #4fc3f7;
+            --success: #4caf50;
+            --error: #ef5350;
+            --border-radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            height: 100dvh; /* Dynamic viewport height for mobile browsers */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 450px;
+            height: 100%;
+            max-height: 800px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Stats Bar */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 5px;
+        }
+
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-sub);
+            font-weight: 700;
+        }
+
+        .stat-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        /* Timer Bar */
+        .timer-container {
+            width: 100%;
+            height: 6px;
+            background: var(--accent-light);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #timer-bar {
+            height: 100%;
+            width: 100%;
+            background: var(--accent);
+            transition: width 1s linear;
+        }
+
+        /* Flag Card */
+        .flag-card {
+            flex-grow: 1;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 145, 234, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        #flag-img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            object-fit: contain;
+        }
+
+        /* Options Grid */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .option-btn {
+            background: var(--card-bg);
+            border: 2px solid var(--accent-light);
+            padding: 18px 10px;
+            border-radius: var(--border-radius);
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:active {
+            transform: scale(0.96);
+        }
+
+        .option-btn.correct {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .option-btn.wrong {
+            background: var(--error);
+            border-color: var(--error);
+            color: white;
+        }
+
+        /* Next Button Overlay */
+        #next-btn {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text-main);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 10;
+        }
+
+        #loader {
+            color: var(--accent);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <div class="stat-box">
+            <span class="stat-label">Score</span>
+            <span class="stat-value" id="score">0</span>
+        </div>
+        <div class="stat-box" style="text-align: right;">
+            <span class="stat-label">Best</span>
+            <span class="stat-value" id="high-score">0</span>
+        </div>
+    </div>
+
+    <div class="timer-container">
+        <div id="timer-bar"></div>
+    </div>
+
+    <div class="flag-card">
+        <span id="loader">Fetching Flags...</span>
+        <img id="flag-img" src="" alt="" style="display: none;">
+        <button id="next-btn" onclick="nextQuestion()">CONTINUE</button>
+    </div>
+
+    <div class="options-grid" id="options">
+        </div>
+</div>
+
+<script>
+    let countries = [];
+    let currentAnswer = null;
+    let score = 0;
+    let highScore = localStorage.getItem('flagMasterScore') || 0;
+    let timer;
+    let timeLeft = 10;
+    const TIME_LIMIT = 10;
+
+    const elements = {
+        score: document.getElementById('score'),
+        highScore: document.getElementById('high-score'),
+        timer: document.getElementById('timer-bar'),
+        flag: document.getElementById('flag-img'),
+        options: document.getElementById('options'),
+        next: document.getElementById('next-btn'),
+        loader: document.getElementById('loader')
+    };
+
+    elements.highScore.innerText = highScore;
+
+    async function init() {
+        try {
+            const res = await fetch('https://restcountries.com/v3.1/all?fields=name,flags');
+            countries = (await res.json()).filter(c => c.name.common && c.flags.svg);
+            nextQuestion();
+        } catch (err) {
+            elements.loader.innerText = "Connection Error";
+        }
+    }
+
+    function startTimer() {
+        timeLeft = TIME_LIMIT;
+        elements.timer.style.transition = 'none';
+        elements.timer.style.width = '100%';
+        elements.timer.style.background = 'var(--accent)';
+        
+        elements.timer.offsetHeight; // Reflow
+        
+        elements.timer.style.transition = `width ${TIME_LIMIT}s linear`;
+        elements.timer.style.width = '0%';
+
+        timer = setInterval(() => {
+            timeLeft--;
+            if (timeLeft <= 3) elements.timer.style.background = 'var(--error)';
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                reveal(null);
+            }
+        }, 1000);
+    }
+
+    function nextQuestion() {
+        clearInterval(timer);
+        elements.next.style.display = 'none';
+        elements.options.innerHTML = '';
+        elements.loader.style.display = 'none';
+        elements.flag.style.display = 'block';
+
+        const shuffled = [...countries].sort(() => 0.5 - Math.random());
+        const choices = shuffled.slice(0, 4);
+        currentAnswer = choices[Math.floor(Math.random() * 4)];
+        
+        elements.flag.src = currentAnswer.flags.svg;
+
+        choices.forEach(country => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = country.name.common;
+            btn.onclick = () => reveal(btn, country.name.common);
+            elements.options.appendChild(btn);
+        });
+
+        startTimer();
+    }
+
+    function reveal(selectedBtn, name) {
+        clearInterval(timer);
+        elements.timer.style.transition = 'none';
+        
+        const buttons = document.querySelectorAll('.option-btn');
+        buttons.forEach(btn => {
+            btn.disabled = true;
+            if (btn.innerText === currentAnswer.name.common) {
+                btn.classList.add('correct');
+            }
+        });
+
+        if (name === currentAnswer.name.common) {
+            score++;
+            elements.score.innerText = score;
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('flagMasterScore', highScore);
+                elements.highScore.innerText = highScore;
+            }
+        } else if (selectedBtn) {
+            selectedBtn.classList.add('wrong');
+        }
+
+        elements.next.style.display = 'block';
+    }
+
+    init();
+</script>
+
+</body>
+</html>
