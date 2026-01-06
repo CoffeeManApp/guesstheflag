@@ -2,7 +2,7 @@
 
 A fast-paced and beautiful web app to test your global flag knowledge. Built with Vanilla HTML, CSS, JavaScript, and the REST Countries API.
 
-🚀 Features
+## 🚀 Features
 ✅ Real-time data for 250+ countries via API
 
 ✅ 10-second countdown timer with visual color alerts
@@ -13,7 +13,7 @@ A fast-paced and beautiful web app to test your global flag knowledge. Built wit
 
 ✅ Stored locally in your browser (no account needed)
 
-📱 How to Use
+## 📱 How to Use
 Observe the flag displayed in the center card.
 
 Select the correct country name from the four options below.
@@ -26,7 +26,7 @@ If you choose correctly, your score increases. If you miss, the correct answer i
 
 Click "Continue" to move to the next flag and beat your high score.
 
-🔐 Data Storage & Privacy
+## 🔐 Data Storage & Privacy
 Your High Score is saved locally on your device using Local Storage.
 
 This means your progress stays private and is not uploaded to any server.
@@ -35,8 +35,8 @@ If you clear your browser cache, your high score will be reset.
 
 No personal data or location tracking is used.
 
-🌐 The app link
-👉 Click here to use the app
+## 🌐 The app link
+👉 [Click here to use the app](https://coffeemanapp.github.io/guesstheflag/guesstheflag.html)
 
 📲 Add to Home Screen (For Easy Access) You can install this quiz like a native app on your phone! Here's how:
 
@@ -60,7 +60,7 @@ Tap Add to Home screen.
 
 Confirm by tapping Add.
 
-🛠️ Tech Stack
+## 🛠️ Tech Stack
 HTML5 & CSS3 (Modern Flexbox/Grid)
 
 Vanilla JavaScript (ES6+)
@@ -83,7 +83,7 @@ LocalStorage for score persistence
 
 ✅ 数据保存在你的浏览器本地（无需注册账号）
 
-📱 使用方法
+##📱 使用方法
 观察中心卡片显示的国旗
 
 从下方的四个选项中选择正确的国家名称
@@ -96,7 +96,11 @@ LocalStorage for score persistence
 
 点击 "Continue" 继续下一关，不断刷新你的最高纪录
 
-🔐 数据存储与隐私
+## 🌐 应用链接
+
+👉  [点击这里即可使用](https://coffeemanapp.github.io/guesstheflag/guesstheflag.html)
+
+## 🔐 数据存储与隐私
 你的最高纪录保存在你设备的本地存储（Local Storage）
 
 你的数据不会上传到任何地方，完全私密
@@ -110,7 +114,8 @@ REST Countries API（国旗数据源）
 
 LocalStorage（离线高分存储）
 
-🧔 Author
-Created by @CoffeeManApp
+## 🧔 Author
 
-Donation: @Buymeacoffee
+Created by [@CoffeeManApp](https://github.com/CoffeeManApp)
+
+Donation: [@Buymeacoffee](https://buymeacoffee.com/coffeemantravel)
